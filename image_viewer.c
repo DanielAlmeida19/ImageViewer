@@ -2,8 +2,14 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_stdinc.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(void) {
+
+    printf("Starting parsing the image...\n");
+    FILE *in = stdin;
+    char *sizeImageString = calloc(1000, sizeof(char));
+    fgets(sizeImageString, 1000, in);
 
     const int width = 900;
     const int height = 600;
