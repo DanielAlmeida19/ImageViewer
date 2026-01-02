@@ -8,55 +8,61 @@ int main(void) {
 
     printf("Starting parsing the image...\n");
     FILE *in = stdin;
-    char *sizeImageString = calloc(1000, sizeof(char));
-    fgets(sizeImageString, 1000, in);
+    char *throwAway = calloc(1000, sizeof(char));
 
-    const int width = 900;
-    const int height = 600;
+    // Read the first line (specifier P3 or P6 - ignore here)
+    fgets(throwAway, 1000, in);
+
+    // Read the second line (comment)
+    fgets(throwAway, 1000, in);
+
+    // Read the third line (dimmensions: width and height)
+    char *dimensions = calloc(1000, sizeof(char));
+    fgets(dimensions, 1000, in);
+
+    int width = -1;
+    int height = -1;
+    sscanf(dimensions, "%d %d\n", &width, &height);
+    printf("width = %d; height = %d\n", width, height);
+    free(dimensions);
+
+    // Read the fourth line (maximum color value - ignore here)
+    fgets(throwAway, 1000, in);
+    free(throwAway);
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_Window *window = SDL_CreateWindow("Simple Window", SDL_WINDOWPOS_CENTERED,
+    SDL_Window *window = SDL_CreateWindow("Image Viewer", SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED, width, height, 0);
 
     SDL_Surface *surface = SDL_GetWindowSurface(window);
 
-    Uint8 r, g, b;
-    r = 0xFF;
-    g = b = 0;
-
-    Uint32 color = SDL_MapRGB(surface->format, r, g, b);
-
-    // int x = 50;
-    // int y = 50;
-    // SDL_Rect rect = (SDL_Rect){x, y, 100, 100};
-    // SDL_FillRect(surface, &rect, color);
-
     SDL_Rect pixel = (SDL_Rect){0, 0, 1, 1};
-    for (int x = 0; x < width; x++) {
-        pixel.x = x;
-        for (int y = 0; y < height; y++) {
+    Uint32 color = 0;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            Uint8 r, g, b;
+            r = (char)getchar();
+            g = (char)getchar();
+            b = (char)getchar();
+
+            color = SDL_MapRGB(surface->format, r, g, b);
+            pixel.x = x;
             pixel.y = y;
+
             SDL_FillRect(surface, &pixel, color);
         }
     }
 
     SDL_UpdateWindowSurface(window);
 
-    SDL_Event e;
-    Uint32 start = SDL_GetTicks();
-
-    // Loop de eventos por 3 segundos
-    while (SDL_GetTicks() - start < 3000) {
+    int appRunning = 1;
+    while (appRunning) {
+        SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT)
-                goto quit;
+                appRunning = 0;
         }
-        SDL_Delay(16);
+        SDL_Delay(100);
     }
-
-quit:
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 0;
 }
